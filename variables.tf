@@ -34,12 +34,20 @@ variable "ScheduleTimezone" {
 
 variable "Duration" {
   type        = number
+  default     = 2
   description = "(Required) The duration of the Maintenance Window in hours."
 }
 
 variable "Cutoff" {
   type        = number
+  default     = 1
   description = "(Required) The number of hours before the end of the Maintenance Window that Systems Manager stops scheduling new tasks for execution."
+}
+
+variable "Enabled" {
+  type        = bool
+  default     = true
+  description = "(Optional) Whether the maintenance window is enabled."
 }
 
 variable "AllowUnassociatedTargets" {
@@ -48,8 +56,43 @@ variable "AllowUnassociatedTargets" {
   description = "(Optional) Whether targets must be registered with the Maintenance Window before tasks can be defined for those targets."
 }
 
-variable "Enabled" {
-  type        = bool
-  default     = true
-  description = "(Optional) Whether the maintenance window is enabled."
+variable "Targets" {
+  description = "List of maintenance window targets."
+  type = list(object({
+    Name             = optional(string)
+    Description      = optional(string)
+    ResourceType     = string
+    OwnerInformation = optional(string)
+    Target           = map(list(string))
+  }))
+  default = []
+}
+
+variable "Tasks" {
+  description = "List of maintenance window tasks."
+  type = list(object({
+    Name                = optional(string)
+    Description         = optional(string)
+    MaxConcurrency      = optional(string, "100%")
+    MaxErrors           = optional(string, "100%")
+    Priority            = number
+    TaskArn             = string
+    TaskType            = optional(string, "RUN_COMMAND")
+    ServiceRoleArn      = string
+    CutoffBehavior      = optional(string)
+    Target_Id           = list(number)
+    DocumentVersion     = optional(string, "$DEFAULT")
+    Parameters          = optional(map(list(string)))
+    Comment             = optional(string)
+    TimeoutSeconds      = optional(number)
+    OutputS3BucketName  = optional(string)
+    NotificationEnabled = optional(bool, false)
+    NotificationRoleArn = optional(string)
+    NotificationConfig = optional(object({
+      NotificationArn    = optional(string)
+      NotificationEvents = optional(list(string))
+      NotificationType   = optional(string)
+    }))
+  }))
+  default = []
 }
